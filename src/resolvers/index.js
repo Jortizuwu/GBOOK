@@ -3,15 +3,29 @@ const {
   userMutations,
   authMutations,
   statusMutations,
-  bookMutations
+  bookMutations,
+  contentMutations
 } = require('./mutations')
-const { userQuerys, roleQuerys } = require('./querys')
+const {
+  userQuerys,
+  roleQuerys,
+  contentQuerys,
+  bookQuerys
+} = require('./querys')
 
 const resolvers = {
   Query: {
     // user
     getUsers: (_, __, context) => userQuerys.getUsers(context),
     getUserById: (_, args) => userQuerys.getUserById(args),
+
+    // book
+    getBooks: (_, __, context) => bookQuerys.getBooks(context),
+    getBookById: (_, args) => userQuerys.getBookById(args),
+
+    // content
+    getContents: (_, __, context) => contentQuerys.getContents(context),
+    getContentsById: (_, args) => contentQuerys.getContentById(args),
 
     // role
     getRoles: (_, __, context) => roleQuerys.getRoles(context)
@@ -30,6 +44,10 @@ const resolvers = {
     deleteBook: (_, args, context) => bookMutations.deleteBook(args, context),
     disableOrActiveBook: (_, args, context) =>
       bookMutations.disableOrActiveBook(args, context),
+
+    // content
+    createContent: (_, args, context) =>
+      contentMutations.createContent(args, context),
 
     // role
     createRole: (_, args, context) => roleMutations.createRole(args, context),

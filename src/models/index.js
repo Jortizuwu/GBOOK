@@ -52,16 +52,26 @@ bookModel.belongsTo(statusModel, {
   }
 })
 
-// bookModel.belongsToMany(userModel, {
-//   through: contentModel,
-//   foreignKey: {
-//     name: 'bookID'
-//   }
-// })
-// userModel.belongsToMany(bookModel, {
-//   through: contentModel,
-//   foreignKey: { name: 'uid' }
-// })
+// user content
+userModel.hasMany(contentModel, {
+  foreignKey: {
+    name: 'uid'
+  }
+})
+contentModel.belongsTo(userModel, {
+  foreignKey: {
+    name: 'uid'
+  }
+})
+
+// book content
+bookModel.hasMany(contentModel, {
+  foreignKey: { name: 'bookID' }
+})
+
+contentModel.belongsTo(bookModel, {
+  foreignKey: { name: 'bookID' }
+})
 
 module.exports = {
   userModel,

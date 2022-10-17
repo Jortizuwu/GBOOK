@@ -38,6 +38,7 @@ const typeDefs = gql`
     bookID: ID
     User: User
     Status: Status
+    Contents: [Content]
     bookName: String
     description: String
     createdAt: String
@@ -45,8 +46,9 @@ const typeDefs = gql`
   }
 
   type Content {
-    bookID: ID
-    uid: ID
+    contentID: ID
+    User: User
+    Book: Book
     content: String
     createdAt: String
     updatedAt: String
@@ -85,6 +87,13 @@ const typeDefs = gql`
     status: Status
   }
 
+  type ContentResponse implements MutationResponse {
+    code: Int!
+    success: Boolean!
+    message: String
+    content: Content
+  }
+
   type BookResponse implements MutationResponse {
     code: Int!
     success: Boolean!
@@ -97,6 +106,14 @@ const typeDefs = gql`
     # user
     getUsers: [User]
     getUserById(uid: ID!): UserResponse
+
+    # book
+    getBooks: [Book]
+    getBookById(bookID: ID!): BookResponse
+
+    # content
+    getContents: [Content]
+    getContentsById(contentID: ID!): ContentResponse
 
     # role
     getRoles: [Role]
@@ -127,11 +144,12 @@ const typeDefs = gql`
 
     # book
     createBook(bookName: String!, description: String!): BookResponse
-
     updateBook(bookID: ID!, bookName: String, description: String): BookResponse
-
     deleteBook(bookID: ID!): BookResponse
     disableOrActiveBook(bookID: ID!): UserResponse
+
+    # content
+    createContent(bookID: ID!, content: String!): ContentResponse
 
     # role
     createRole(name: AllRoles!): RoleResponse
