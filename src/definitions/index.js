@@ -85,6 +85,14 @@ const typeDefs = gql`
     status: Status
   }
 
+  type BookResponse implements MutationResponse {
+    code: Int!
+    success: Boolean!
+    message: String
+    book: Book
+  }
+
+  # QUERY
   type Query {
     # user
     getUsers: [User]
@@ -94,6 +102,7 @@ const typeDefs = gql`
     getRoles: [Role]
   }
 
+  # MUTATION
   type Mutation {
     # user
     createUser(
@@ -105,6 +114,7 @@ const typeDefs = gql`
     ): UserResponse
 
     updateUser(
+      uid: ID
       name: String
       lastName: String
       nickName: String
@@ -113,6 +123,15 @@ const typeDefs = gql`
     ): UserResponse
 
     deleteUser(uid: ID!): UserResponse
+    disableOrActiveUser(uid: ID!): UserResponse
+
+    # book
+    createBook(bookName: String!, description: String!): BookResponse
+
+    updateBook(bookID: ID!, bookName: String, description: String): BookResponse
+
+    deleteBook(bookID: ID!): BookResponse
+    disableOrActiveBook(bookID: ID!): UserResponse
 
     # role
     createRole(name: AllRoles!): RoleResponse

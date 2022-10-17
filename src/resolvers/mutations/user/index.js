@@ -6,22 +6,43 @@ const bcrypt = require('bcryptjs')
 const { findRoleByName, onlyAdmin } = require('../../../helpers/role')
 const { userModel } = require('../../../models')
 const { generateJWT } = require('../../../helpers/auth')
-const { validatePassword, findUserById } = require('../../../helpers/user')
+const {
+  validatePassword,
+  findUserById,
+  nickNameUsed
+} = require('../../../helpers/user')
+const { findStatusByCode } = require('../../../helpers/status')
 
 const userMutations = {
   createUser: async (data) => {
     try {
       const role = await findRoleByName(data.RoleName)
-      if (!role?.roleID) throw new UserInputError('opps the role is`n valid!')
+      if (!role?.roleID) throw new UserInputError('opps!! the role is`n valid!')
+
+      const status = await findStatusByCode('ACTIVE')
+      if (!status?.statusID) {
+        throw new UserInputError('opps!! the status code is`n valid!')
+      }
+      await nickNameUsed(data.nickName)
 
       const hash = bcrypt.hashSync(data.password, bcrypt.genSaltSync(10))
 
-      const user = await userModel.create({
-        ...data,
-        uid: uuidv4(),
-        roleID: role.roleID,
-        password: hash
-      })
+      const user = await userModel.create(
+        {
+          ...data,
+          uid: uuidv4(),
+          roleID: role.roleID,
+          password: hash,
+          statusID: status.statusID
+        },
+        {
+          include: [
+            {
+              all: true
+            }
+          ]
+        }
+      )
 
       if (!user) {
         throw new GraphQLError('opps!', {
@@ -48,10 +69,10 @@ const userMutations = {
       return error
     }
   },
-  updateUser: async (data, context) => {
+  updateUser: async (data) => {
     try {
       let password = null
-      const user = await findUserById(context.user.uid)
+      const user = await findUserById(data.uid)
 
       if (data.newPassword && data.oldPassword) {
         await validatePassword(data.oldPassword, user.password)
@@ -75,7 +96,7 @@ const userMutations = {
   deleteUser: async (data, context) => {
     try {
       onlyAdmin(context.user)
-      const user = await userModel.findByPk(data.uid)
+      const user = await findUserById(data.uid)
       if (!user) {
         throw new GraphQLError('user not found', {
           extensions: {
@@ -90,6 +111,31 @@ const userMutations = {
         code: 200,
         success: true,
         message: 'user delete'
+      }
+    } catch (error) {
+      return error
+    }
+  },
+  disableOrActiveUser: async (context) => {
+    try {
+      const user = await findUserById(context)
+
+      const status = await findStatusByCode(
+        user.Status.statusCode === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE'
+      )
+      if (!status?.statusID) {
+        throw new UserInputError('opps!! the status code is`n valid!')
+      }
+
+      await userModel.update(
+        { statusID: status.statusID },
+        { where: { uid: context.uid } }
+      )
+
+      return {
+        code: 200,
+        success: true,
+        message: 'user disabled'
       }
     } catch (error) {
       return error

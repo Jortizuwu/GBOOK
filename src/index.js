@@ -5,6 +5,7 @@ const {
   ApolloServerPluginLandingPageProductionDefault
 } = require('apollo-server-core')
 const { GraphQLError } = require('graphql')
+// const { GraphQLError } = require('graphql')
 
 const { connection } = require('./db')
 const typeDefs = require('./definitions')
@@ -18,6 +19,7 @@ const server = new ApolloServer({
   resolvers,
   csrfPrevention: true,
   cache: 'bounded',
+  cors: { origin: true },
   context: async ({ req, res }) => {
     const token = req.headers.authorization || ''
     const user = validateJWT(token)

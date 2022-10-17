@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const { GraphQLError } = require('graphql')
-const { userModel } = require('../../models')
+const { userModel, bookModel, statusModel } = require('../../models')
 
 const validatePassword = async (old, curr) => {
   if (!(await bcrypt.compare(old, curr))) {
@@ -17,6 +17,12 @@ const findUserById = async (uid) => {
     include: [
       {
         all: true
+      },
+      {
+        model: bookModel,
+        include: {
+          model: statusModel
+        }
       }
     ]
   })
@@ -33,7 +39,22 @@ const findUserById = async (uid) => {
   return user.dataValues
 }
 
+const nickNameUsed = async (nickName) => {
+  const user = await userModel.findOne({ where: { nickName } })
+  if (user) {
+    throw new GraphQLError('the nick name already in use', {
+      extensions: {
+        code: 'ERRORUSERIMPUT',
+        http: {
+          status: 401
+        }
+      }
+    })
+  }
+}
+
 module.exports = {
   validatePassword,
-  findUserById
+  findUserById,
+  nickNameUsed
 }

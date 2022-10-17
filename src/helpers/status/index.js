@@ -1,4 +1,3 @@
-// const { GraphQLError } = require('graphql')
 const { statusModel } = require('../../models')
 
 const findStatusByCode = async (statusCode) => {

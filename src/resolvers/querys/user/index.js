@@ -1,6 +1,6 @@
 const { onlyAdmin } = require('../../../helpers/role')
 const { findUserById } = require('../../../helpers/user')
-const { userModel } = require('../../../models')
+const { userModel, bookModel, statusModel } = require('../../../models')
 
 const userQuerys = {
   getUsers: async (context) => {
@@ -10,9 +10,16 @@ const userQuerys = {
         include: [
           {
             all: true
+          },
+          {
+            model: bookModel,
+            include: {
+              model: statusModel
+            }
           }
         ]
       })
+
       return user
     } catch (error) {
       return error
