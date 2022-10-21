@@ -1,11 +1,13 @@
-// const { onlyAdmin } = require('../../../helpers/role')
+const { onlyAdmin } = require('../../../helpers/role')
 const { findContentById } = require('../../../helpers/content')
 const { contentModel } = require('../../../models')
+const { validateLogin } = require('../../../helpers/auth')
 
-const bookQuerys = {
+const contentQuerys = {
   getContents: async (context) => {
     try {
-      // onlyAdmin(context.user)
+      validateLogin(context.user)
+      onlyAdmin(context.user)
       const contents = await contentModel.findAll({
         include: [
           {
@@ -34,4 +36,4 @@ const bookQuerys = {
   }
 }
 
-module.exports = bookQuerys
+module.exports = contentQuerys

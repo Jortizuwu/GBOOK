@@ -1,3 +1,7 @@
+const { PubSub } = require('graphql-subscriptions')
+
+const pubsub = new PubSub()
+
 const {
   roleMutations,
   userMutations,
@@ -60,6 +64,11 @@ const resolvers = {
     loginWhitNickNameAndPassword: (_, args) =>
       authMutations.loginWhitNickNameAndPassword(args),
     loginWhitToken: (_, args) => authMutations.loginWhitToken(args)
+  },
+  Subscription: {
+    contentAdd: {
+      subscribe: () => pubsub.asyncIterator(['CONTENT_ADD'])
+    }
   }
 }
 

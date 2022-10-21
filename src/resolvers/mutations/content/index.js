@@ -1,28 +1,36 @@
-const { GraphQLError } = require('graphql')
+// const { GraphQLError } = require('graphql')
+const { PubSub } = require('graphql-subscriptions')
 const { v4: uuidv4 } = require('uuid')
+
+const { validateLogin } = require('../../../helpers/auth')
 const { findBookById } = require('../../../helpers/book')
 const { contentModel } = require('../../../models')
+
+const pubSub = new PubSub()
 
 const contentMutations = {
   createContent: async (data, context) => {
     try {
+      validateLogin(context.user)
       await findBookById(data.bookID)
 
-      const user = await contentModel.findOne({
-        where: { bookID: data.bookID, uid: context.user.uid }
-      })
+      // const user = await contentModel.findOne({
+      //   where: { bookID: data.bookID, uid: context.user.uid }
+      // })
 
-      if (user) {
-        throw new GraphQLError(
-          'sorry but you can only add one piece content per book'
-        )
-      }
+      // if (user) {
+      //   throw new GraphQLError(
+      //     'sorry but you can only add one piece content per book'
+      //   )
+      // }
 
-      const content = await contentModel.create({
+      const content = await contentModel.build({
         ...data,
         contentID: uuidv4(),
         uid: context.user.uid
       })
+
+      pubSub.publish('CONTENT_ADD', { contentAdd: content.dataValues })
 
       return {
         code: 200,

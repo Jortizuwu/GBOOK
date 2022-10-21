@@ -2,7 +2,7 @@ const { UserInputError } = require('apollo-server')
 const cbcrypt = require('bcryptjs')
 const { generateJWT, validateJWT } = require('../../../helpers/auth')
 
-const { userModel, statusModel } = require('../../../models')
+const { userModel, statusModel, roleModel } = require('../../../models')
 
 const authMutations = {
   loginWhitNickNameAndPassword: async (data) => {
@@ -11,16 +11,18 @@ const authMutations = {
         where: { nickName: data.nickName },
         include: [
           {
-            all: true
-          },
-          {
             model: statusModel,
             where: {
               statusCode: 'ACTIVE'
             }
+          },
+          {
+            model: roleModel,
+            attributes: ['name', 'roleID']
           }
         ]
       })
+
       if (!user) throw new UserInputError('the user not found or inactive')
 
       const hash = cbcrypt.compareSync(data.password, user.password)

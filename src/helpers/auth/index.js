@@ -1,3 +1,4 @@
+const { GraphQLError } = require('graphql')
 const jwt = require('jsonwebtoken')
 
 const PRIVATE_KEY = process.env.JWT_PRIVATE_KEY
@@ -17,4 +18,14 @@ const generateJWT = (data) =>
     expiresIn: '24h'
   })
 
-module.exports = { validateJWT, generateJWT }
+const validateLogin = (user) => {
+  if (!user) {
+    throw new GraphQLError('User is not authenticated', {
+      extensions: {
+        code: 'UNAUTHENTICATED',
+        http: { status: 400 }
+      }
+    })
+  }
+}
+module.exports = { validateJWT, generateJWT, validateLogin }

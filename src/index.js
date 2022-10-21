@@ -1,11 +1,20 @@
-const { ApolloServer } = require('apollo-server')
-require('dotenv').config()
+const express = require('express')
+const cors = require('cors')
+const { json } = require('body-parser')
+const { createServer } = require('http')
+const { ApolloServer } = require('@apollo/server')
+const { expressMiddleware } = require('@apollo/server/express4')
 const {
   ApolloServerPluginLandingPageLocalDefault,
   ApolloServerPluginLandingPageProductionDefault
 } = require('apollo-server-core')
-const { GraphQLError } = require('graphql')
-// const { GraphQLError } = require('graphql')
+const {
+  ApolloServerPluginDrainHttpServer
+} = require('@apollo/server/plugin/drainHttpServer')
+const { makeExecutableSchema } = require('@graphql-tools/schema')
+const { WebSocketServer } = require('ws')
+const { useServer } = require('graphql-ws/lib/use/ws')
+require('dotenv').config()
 
 const { connection } = require('./db')
 const typeDefs = require('./definitions')
@@ -14,32 +23,61 @@ const resolvers = require('./resolvers')
 
 connection()
 
+const PORT = process.env.PORT
+
+const schema = makeExecutableSchema({ typeDefs, resolvers })
+const app = express()
+const httpServer = createServer(app)
+
+const wsServer = new WebSocketServer({
+  server: httpServer,
+  path: '/graphql'
+})
+
+const serverCleanup = useServer({ schema }, wsServer)
+
 const server = new ApolloServer({
-  typeDefs,
-  resolvers,
+  schema,
   csrfPrevention: true,
   cache: 'bounded',
   cors: { origin: true },
-  context: async ({ req, res }) => {
-    const token = req.headers.authorization || ''
-    const user = validateJWT(token)
-    if (!user) {
-      throw new GraphQLError('User is not authenticated', {
-        extensions: {
-          code: 'UNAUTHENTICATED',
-          http: { status: 400 }
-        }
-      })
-    }
-    return { user }
-  },
   plugins: [
     process.env.NODE_ENV === 'prod'
       ? ApolloServerPluginLandingPageProductionDefault({ footer: false })
-      : ApolloServerPluginLandingPageLocalDefault({ footer: false })
+      : ApolloServerPluginLandingPageLocalDefault({ footer: false }),
+
+    ApolloServerPluginDrainHttpServer({ httpServer }),
+
+    {
+      async serverWillStart () {
+        return {
+          async drainServer () {
+            await serverCleanup.dispose()
+          }
+        }
+      }
+    }
   ]
 })
 
-server.listen({ port: process.env.PORT }).then(({ url }) => {
-  console.log(`Server ready at ${url}`)
-})
+;(async () => {
+  await server.start()
+  app.use(
+    '/graphql',
+    cors(),
+    json(),
+    expressMiddleware(server, {
+      context: async ({ req }) => {
+        const token = req.headers.authorization || ''
+        const user = validateJWT(token)
+        return { user }
+      }
+    })
+  )
+  httpServer.listen(PORT, () => {
+    console.log(`🚀 Query endpoint ready at http://localhost:${PORT}/graphql`)
+    console.log(
+      `🚀 Subscription endpoint ready at ws://localhost:${PORT}/graphql`
+    )
+  })
+})()

@@ -1,10 +1,12 @@
 const { onlyAdmin } = require('../../../helpers/role')
 const { findBookById } = require('../../../helpers/book')
 const { bookModel, contentModel } = require('../../../models')
+const { validateLogin } = require('../../../helpers/auth')
 
 const bookQuerys = {
   getBooks: async (context) => {
     try {
+      validateLogin(context.user)
       onlyAdmin(context.user)
       const books = await bookModel.findAll({
         include: [

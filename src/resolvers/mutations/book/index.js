@@ -1,6 +1,7 @@
 const { UserInputError } = require('apollo-server')
 const { GraphQLError } = require('graphql')
 const { v4: uuidv4 } = require('uuid')
+const { validateLogin } = require('../../../helpers/auth')
 
 const { findBookById } = require('../../../helpers/book')
 const { onlyAdmin } = require('../../../helpers/role')
@@ -10,6 +11,7 @@ const { bookModel } = require('../../../models')
 const bookMutations = {
   createBook: async (data, context) => {
     try {
+      validateLogin(context.user)
       const status = await findStatusByCode('ACTIVE')
 
       if (!status?.statusID) throw new GraphQLError('the status is`n valid')
@@ -33,6 +35,7 @@ const bookMutations = {
   },
   updateBook: async (data, context) => {
     try {
+      validateLogin(context.user)
       await findBookById(data.bookID)
 
       await bookModel.update(
@@ -51,6 +54,7 @@ const bookMutations = {
   },
   deleteBook: async (data, context) => {
     try {
+      validateLogin(context.user)
       onlyAdmin(context.user)
       await bookModel.destroy({ where: { bookID: data.bookID } })
 
@@ -65,6 +69,7 @@ const bookMutations = {
   },
   disableOrActiveBook: async (data, context) => {
     try {
+      validateLogin(context.user)
       const book = await findBookById(data.bookID)
 
       const status = await findStatusByCode(

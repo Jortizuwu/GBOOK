@@ -165,5 +165,10 @@ const typeDefs = gql`
 
     loginWhitToken(token: String!): UserResponse
   }
+
+  # subscritons
+  type Subscription {
+    contentAdd: Content
+  }
 `
 module.exports = typeDefs

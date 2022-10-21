@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs')
 
 const { findRoleByName, onlyAdmin } = require('../../../helpers/role')
 const { userModel } = require('../../../models')
-const { generateJWT } = require('../../../helpers/auth')
+const { generateJWT, validateLogin } = require('../../../helpers/auth')
 const {
   validatePassword,
   findUserById,
@@ -95,6 +95,7 @@ const userMutations = {
   },
   deleteUser: async (data, context) => {
     try {
+      validateLogin(context.user)
       onlyAdmin(context.user)
       const user = await findUserById(data.uid)
       if (!user) {

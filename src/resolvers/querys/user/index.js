@@ -1,3 +1,4 @@
+const { validateLogin } = require('../../../helpers/auth')
 const { onlyAdmin } = require('../../../helpers/role')
 const { findUserById } = require('../../../helpers/user')
 const { userModel, bookModel, statusModel } = require('../../../models')
@@ -5,6 +6,7 @@ const { userModel, bookModel, statusModel } = require('../../../models')
 const userQuerys = {
   getUsers: async (context) => {
     try {
+      validateLogin(context.user)
       onlyAdmin(context.user)
       const user = await userModel.findAll({
         include: [
