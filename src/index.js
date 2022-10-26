@@ -31,7 +31,7 @@ const httpServer = createServer(app)
 
 const wsServer = new WebSocketServer({
   server: httpServer,
-  path: '/graphql'
+  path: '/'
 })
 
 const serverCleanup = useServer({ schema }, wsServer)
@@ -63,7 +63,7 @@ const server = new ApolloServer({
 ;(async () => {
   await server.start()
   app.use(
-    '/graphql',
+    '/',
     cors(),
     json(),
     expressMiddleware(server, {
@@ -75,9 +75,7 @@ const server = new ApolloServer({
     })
   )
   httpServer.listen(PORT, () => {
-    console.log(`🚀 Query endpoint ready at http://localhost:${PORT}/graphql`)
-    console.log(
-      `🚀 Subscription endpoint ready at ws://localhost:${PORT}/graphql`
-    )
+    console.log(`🚀 Query endpoint ready at http://localhost:${PORT}`)
+    console.log(`🚀 Subscription endpoint ready at ws://localhost:${PORT}`)
   })
 })()

@@ -1,6 +1,6 @@
 const { onlyAdmin } = require('../../../helpers/role')
 const { findBookById } = require('../../../helpers/book')
-const { bookModel, contentModel } = require('../../../models')
+const { bookModel, contentModel, userModel } = require('../../../models')
 const { validateLogin } = require('../../../helpers/auth')
 
 const bookQuerys = {
@@ -20,6 +20,12 @@ const bookQuerys = {
                 all: true
               }
             ]
+          },
+          {
+            model: userModel,
+            attributes: {
+              exclude: ['password']
+            }
           }
         ]
       })
@@ -31,7 +37,17 @@ const bookQuerys = {
   },
   getBookById: async (args) => {
     try {
-      const book = await findBookById(args.bookID)
+      const book = await findBookById(args.bookID, {
+        include: [
+          { all: true },
+          {
+            model: userModel,
+            attributes: {
+              exclude: ['password']
+            }
+          }
+        ]
+      })
       return {
         book,
         code: 200,

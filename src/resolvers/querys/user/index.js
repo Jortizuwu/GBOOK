@@ -29,7 +29,9 @@ const userQuerys = {
   },
   getUserById: async (args) => {
     try {
-      const { password, ...user } = await findUserById(args.uid)
+      const { password, ...user } = await findUserById(args.uid, {
+        include: [{ all: true }]
+      })
       return {
         user,
         code: 200,

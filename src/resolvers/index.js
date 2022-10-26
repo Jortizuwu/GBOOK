@@ -51,7 +51,7 @@ const resolvers = {
 
     // content
     createContent: (_, args, context) =>
-      contentMutations.createContent(args, context),
+      contentMutations.createContent(args, context, pubsub),
 
     // role
     createRole: (_, args, context) => roleMutations.createRole(args, context),
@@ -67,7 +67,7 @@ const resolvers = {
   },
   Subscription: {
     contentAdd: {
-      subscribe: () => pubsub.asyncIterator(['CONTENT_ADD'])
+      subscribe: () => pubsub.asyncIterator('CONTENT_ADD')
     }
   }
 }

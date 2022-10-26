@@ -1,6 +1,6 @@
 const { onlyAdmin } = require('../../../helpers/role')
 const { findContentById } = require('../../../helpers/content')
-const { contentModel } = require('../../../models')
+const { contentModel, userModel } = require('../../../models')
 const { validateLogin } = require('../../../helpers/auth')
 
 const contentQuerys = {
@@ -12,6 +12,12 @@ const contentQuerys = {
         include: [
           {
             all: true
+          },
+          {
+            model: userModel,
+            attributes: {
+              exclude: ['password']
+            }
           }
         ]
       })
@@ -23,7 +29,17 @@ const contentQuerys = {
   },
   getContentById: async (args) => {
     try {
-      const content = await findContentById(args.contentID)
+      const content = await findContentById(args.contentID, {
+        include: [
+          { all: true },
+          {
+            model: userModel,
+            attributes: {
+              exclude: ['password']
+            }
+          }
+        ]
+      })
       return {
         content,
         code: 200,
