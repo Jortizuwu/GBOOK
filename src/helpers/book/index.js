@@ -1,5 +1,10 @@
 const { GraphQLError } = require('graphql')
-const { bookModel, statusModel } = require('../../models')
+const {
+  bookModel,
+  statusModel,
+  userModel,
+  contentModel
+} = require('../../models')
 
 const findBookById = async (bookID) => {
   const book = await bookModel.findByPk(bookID, {
@@ -12,8 +17,26 @@ const findBookById = async (bookID) => {
         where: {
           statusCode: 'ACTIVE'
         }
+      },
+      {
+        model: userModel,
+        attributes: {
+          exclude: ['password']
+        }
+      },
+      {
+        model: contentModel,
+        include: [
+          {
+            model: userModel,
+            attributes: {
+              exclude: ['password']
+            }
+          }
+        ]
       }
-    ]
+    ],
+    order: [[contentModel, 'createdAt', 'ASC']]
   })
   if (!book) {
     throw new GraphQLError('book not found or disabled', {

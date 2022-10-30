@@ -24,7 +24,10 @@ const findUserById = async (uid) => {
           model: statusModel
         }
       }
-    ]
+    ],
+    attributes: {
+      exclude: ['password']
+    }
   })
   if (!user) {
     throw new GraphQLError('user not found', {
@@ -39,7 +42,7 @@ const findUserById = async (uid) => {
   return user.dataValues
 }
 
-const nickNameUsed = async (nickName) => {
+const nickNameUser = async (nickName) => {
   const user = await userModel.findOne({ where: { nickName } })
   if (user) {
     throw new GraphQLError('the nick name already in use', {
@@ -56,5 +59,5 @@ const nickNameUsed = async (nickName) => {
 module.exports = {
   validatePassword,
   findUserById,
-  nickNameUsed
+  nickNameUser
 }

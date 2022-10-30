@@ -29,17 +29,7 @@ const contentQuerys = {
   },
   getContentById: async (args) => {
     try {
-      const content = await findContentById(args.contentID, {
-        include: [
-          { all: true },
-          {
-            model: userModel,
-            attributes: {
-              exclude: ['password']
-            }
-          }
-        ]
-      })
+      const content = await findContentById(args.contentID)
       return {
         content,
         code: 200,

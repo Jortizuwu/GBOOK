@@ -68,7 +68,7 @@ const server = new ApolloServer({
     json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
-        const token = req.headers.authorization || ''
+        const token = req.headers.authorization.replace('Bearer ', '') || ''
         const user = validateJWT(token)
         return { user }
       }

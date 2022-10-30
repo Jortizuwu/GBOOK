@@ -1,11 +1,17 @@
 const { GraphQLError } = require('graphql')
-const { contentModel } = require('../../models')
+const { contentModel, userModel } = require('../../models')
 
 const findContentById = async (contentID) => {
   const content = await contentModel.findByPk(contentID, {
     include: [
       {
         all: true
+      },
+      {
+        model: userModel,
+        attributes: {
+          exclude: ['password']
+        }
       }
     ]
   })

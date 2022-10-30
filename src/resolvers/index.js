@@ -25,7 +25,7 @@ const resolvers = {
 
     // book
     getBooks: (_, __, context) => bookQuerys.getBooks(context),
-    getBookById: (_, args) => userQuerys.getBookById(args),
+    getBookById: (_, args) => bookQuerys.getBookById(args),
 
     // content
     getContents: (_, __, context) => contentQuerys.getContents(context),

@@ -9,7 +9,7 @@ const { generateJWT, validateLogin } = require('../../../helpers/auth')
 const {
   validatePassword,
   findUserById,
-  nickNameUsed
+  nickNameUser
 } = require('../../../helpers/user')
 const { findStatusByCode } = require('../../../helpers/status')
 
@@ -23,26 +23,17 @@ const userMutations = {
       if (!status?.statusID) {
         throw new UserInputError('opps!! the status code is`n valid!')
       }
-      await nickNameUsed(data.nickName)
+      await nickNameUser(data.nickName)
 
       const hash = bcrypt.hashSync(data.password, bcrypt.genSaltSync(10))
 
-      const user = await userModel.create(
-        {
-          ...data,
-          uid: uuidv4(),
-          roleID: role.roleID,
-          password: hash,
-          statusID: status.statusID
-        },
-        {
-          include: [
-            {
-              all: true
-            }
-          ]
-        }
-      )
+      const user = await userModel.create({
+        ...data,
+        uid: uuidv4(),
+        roleID: role.roleID,
+        password: hash,
+        statusID: status.statusID
+      })
 
       if (!user) {
         throw new GraphQLError('opps!', {
@@ -55,11 +46,11 @@ const userMutations = {
         })
       }
 
-      const { password, ...rest } = user.dataValues
-      const token = generateJWT(rest)
+      const { password, ...userAll } = await findUserById(user.uid)
+      const token = generateJWT(userAll)
 
       return {
-        user,
+        userAll,
         code: 200,
         success: true,
         message: 'user created',

@@ -37,17 +37,7 @@ const bookQuerys = {
   },
   getBookById: async (args) => {
     try {
-      const book = await findBookById(args.bookID, {
-        include: [
-          { all: true },
-          {
-            model: userModel,
-            attributes: {
-              exclude: ['password']
-            }
-          }
-        ]
-      })
+      const book = await findBookById(args.bookID)
       return {
         book,
         code: 200,
